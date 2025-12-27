@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pager - Login</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="/static/css/index.css" rel="stylesheet" type="text/css">
+        <script src="/static/scripts/auth.js"></script>
+    </head>
+    <body>
+        <div id="loginbox">
+            <img src="/static/svg/pager_logo.svg" alt="pager logo" height="50px">
+            <div id="maintext"></div>
+            <div id="aaaa" class="body">
+                <input type="text" id="userinput" class="textinput" placeholder="Username">
+                <input type="password" id="passinput" class="textinput" placeholder="Password">
+            </div>
+            <div id="buttonrow">
+                <button id="registerbutton" class="button buttoninvert" onclick="register()">Register</button>
+                <button id="loginbutton" class="button" onclick="login()">Login</button>
+                <button id="logoutbutton" class="button" onclick="logout()" hidden>Logout</button>
+            </div>
+        </div>
+    </body>
+</html>

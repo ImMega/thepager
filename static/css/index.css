@@ -1,0 +1,102 @@
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+}
+
+#loginbox {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: fixed;
+    min-width: 325px;
+    height: fit-content;
+    padding: 25px 0;
+    width: 40%;
+    justify-content: center;
+    align-items: center;
+    background-color: #FAFAFA;
+    color: white;
+    border-radius: 25pt;
+    box-shadow: 1px 5px 20px -10px black;
+}
+
+.body {
+    height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: height 0.5s, opacity 0.5s;
+    margin: 0;
+    padding: 0;
+}
+
+.show {
+    height: 100px;
+    opacity: 100;
+}
+
+.textinput {
+    background-color: transparent;
+    color: black;
+    outline: none;
+    border: none;
+    border-bottom: 2px solid black;
+    border-radius: 2pt;
+    padding: 10px;
+    width: 80%;
+    margin-left: 150px;
+    margin-right: 150px;
+    transition: border-bottom 0.35s;
+}
+
+.textinput:focus {
+    border-bottom: 2px solid rgb(100, 100, 255);
+}
+
+.button {
+    padding: 7px 20px;
+    border: none;
+    border-radius: 15pt;
+    background-color: #6150FF;
+    color: white;
+    transition: background-color 0.25s, transform 0.15s;
+}
+
+.buttoninvert {
+    background-color: transparent;
+    color: #6150FF;
+    border: 2px solid #6150FF;
+}
+
+.button:hover {
+    background-color: #4f41ce;
+    cursor: pointer;
+}
+
+.buttoninvert:hover {
+    background-color: #4f41ce30;
+}
+
+.button:active {
+    transform: scale(0.9);
+}
+
+#buttonrow {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+#maintext {
+    color: black;
+    font-size: 15pt;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-bottom: -15px;
+}

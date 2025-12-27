@@ -1,0 +1,107 @@
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+
+#maincontainer {
+    display: flex;
+    width: 100vw;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+#chat {
+    background-color: rgb(243, 243, 243);
+    padding: 15px;
+    width: 50vw;
+    min-width: 325px;
+    height: 500px;
+    border-radius: 20pt;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 1px 1px 20px -7px;
+}
+
+#chatbox {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 5px;
+    overflow-y: scroll;
+}
+
+.chatmsg {
+    height: fit-content;
+    background-color: white;
+    padding: 10px 15px;
+    border-radius: 15pt;
+    box-shadow: 1px 1px 7px -5px;
+    word-break: keep-all;
+    word-wrap: break-word;
+}
+
+#inputbox {
+    display: flex;
+    height: 10%;
+    justify-content: center;
+    gap: 5px;
+}
+
+#chatinput {
+    width: 100%;
+    border-radius: 30pt;
+    padding: 0 15px;
+    border: none;
+    box-shadow: 1px 1px 10px -5px;
+}
+
+#chatinput:focus {
+    outline: 1px solid gray;
+}
+
+#sendbutton {
+    height: 100%;
+    aspect-ratio: 1/1;
+    background-color: rgb(107, 111, 240);
+    color: white;
+    border: none;
+    border-radius: 30pt;
+    box-shadow: 1px 1px 7px -1px;
+}
+
+#sendbutton:hover {
+    cursor: pointer;
+}
+
+#sendbutton:active {
+    background-color: rgb(102, 102, 228);
+}
+
+.msgauthor {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+.msgcontent {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    margin-top: 3px;
+}
+
+.msgself {
+    background-color: rgb(125, 116, 255);
+    color: white;
+    box-shadow: 1px 1px 7px -3px black;
+}
+
+#greeting {
+    margin-bottom: 5px;
+}
