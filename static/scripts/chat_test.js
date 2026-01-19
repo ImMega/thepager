@@ -14,8 +14,6 @@ window.onload = fetch('/get-user').then((res) => {
 
         chatid = document.location.pathname.split("/")[2];
 
-        document.getElementById("roomid").innerHTML = chatid;
-
         const roomsRes = await fetch('/get-rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: "Yamega" }) });
         const roomsJson = await roomsRes.json();
         const roomsData = roomsJson.data;

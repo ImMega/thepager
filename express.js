@@ -124,7 +124,7 @@ app.post('/get-rooms', async (req, res) => {
     let userData;
     let chatData;
     const chats = [];
-    console.log("a");
+    
     try {
         userData = await userModel.findOne({ username: username });
         chatData = await chatModel.find({ id: { $in: userData.chats.map(c => c.id) } });
@@ -134,7 +134,6 @@ app.post('/get-rooms', async (req, res) => {
 
     chats.sort((a, b) => new Date(b.lastMsgTimestamp) - new Date(a.lastMsgTimestamp));
 
-    console.log(chats);
     res.json({ success: true, data: chats });
 });
 
