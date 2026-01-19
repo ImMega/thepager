@@ -1,0 +1,142 @@
+body {
+    margin: 0;
+}
+
+#greeting, #roomid {
+    text-align: center;
+}
+
+#greeting, #roomid, .room-name {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#maincontainer {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    width: 100vw;
+    opacity: 1;
+    transition: opacity 2s;
+}
+
+#side-bar {
+    display: flex;
+    flex-direction: column;
+    background-color: #FAFAFA;
+    min-width: 300px;
+    max-height: 100%;
+    box-shadow: -1px 1px 12px 0px gray;
+}
+
+#logo-side {
+    margin: 20px 60px;
+}
+
+#room-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 100%;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+}
+
+.room {
+    margin: 7px 10px;
+    padding: 12px 15px;
+    background-color: white;
+    border-radius: 20pt;
+    box-shadow: 1px 1px 7px -4px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room:hover {
+    cursor: pointer;
+    border-left: 2px solid black;
+}
+
+.room-active {
+    border-right: 10px solid black;
+}
+
+.new-message-indicator {
+    width: 10px;
+    height: 10px;
+    background-color: black;
+    border-radius: 5pt;
+}
+
+#chat-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    width: 100%;
+    padding: 0 15px 10px 15px;
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+#chatbox {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 100%;
+    gap: 10px;
+    padding: 10px 10px;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+}
+
+.chatmsg {
+    height: fit-content;
+    background-color: white;
+    padding: 10px 15px;
+    border-radius: 15pt;
+    box-shadow: 1px 1px 7px -5px;
+    word-break: keep-all;
+    word-wrap: break-word;
+}
+
+.msgauthor {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+.msgcontent {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    margin-top: 3px;
+}
+
+.msgself {
+    background-color: rgb(125, 116, 255);
+    color: white;
+    box-shadow: 1px 1px 7px -3px black;
+}
+
+#input-box {
+    display: flex;
+    gap: 10px;
+    max-width: 100%;
+}
+
+#chatinput {
+    width: 100%;
+    padding: 5px 15px;
+    height: 30px;
+    border: none;
+    border-radius: 20pt;
+    box-shadow: 0.5px 1px 3px 0px gray;
+}
+
+#send-button {
+    height: 100%;
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 20pt;
+    box-shadow: 0.5px 1px 3px 0px gray;
+}

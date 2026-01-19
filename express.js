@@ -17,6 +17,14 @@ const io = new Server(httpServer);
 
 app.use(express.json());
 
+app.get('/test', (req, res) => {
+    res.sendFile('/pages/main.html', { root: __dirname });
+});
+
+app.get('/test/:chatid', async (req, res) => {
+    res.sendFile('/pages/main.html', { root: __dirname });
+})
+
 app.get('/', (req, res) => {
     if (!req.headers.cookie) return res.redirect("/login");
 
@@ -27,7 +35,7 @@ app.get('/', (req, res) => {
 
     if (!data) return res.json({ success: false, message: "Session invalid." })
     
-    res.redirect("/chat")
+    res.redirect("/chat");
 });
 
 app.get('/login', (req, res) => {
@@ -95,19 +103,47 @@ app.get('/get-user', (req, res) => {
     res.json({ success: true, username: data.username });
 });
 
-app.get('/get-chat', async (req, res) => {
+app.post('/get-chat', async (req, res) => {
+    const { chatId } = req.body;
+
+    if (!chatId) return res.status(400).json({ success: false, message: "Must provide chat ID" });
+
     let chatData;
     try {
-        chatData = await chatModel.findOne({ id: "1234567890" });
+        chatData = await chatModel.findOne({ id: chatId });
     } catch(err) { console.log(err); return res.json({ success: false }); }
 
+    if (!chatData) return res.status(404).json({ success: false, message: "Chat doesn't exist" });
+
     return res.json({ success: true, data: chatData });
+});
+
+app.post('/get-rooms', async (req, res) => {
+    const { username } = req.body;
+
+    let userData;
+    let chatData;
+    const chats = [];
+    console.log("a");
+    try {
+        userData = await userModel.findOne({ username: username });
+        chatData = await chatModel.find({ id: { $in: userData.chats.map(c => c.id) } });
+    } catch(err) { console.log(err); return res.json({ success: false }); }
+
+    chatData.forEach(chat => chats.push({ id: chat.id, name: chat.name, lastMsgTimestamp: chat.lastMsgTimestamp, lastSeen: userData.chats.find(c => c.id == chat.id).lastSeen }));
+
+    chats.sort((a, b) => new Date(b.lastMsgTimestamp) - new Date(a.lastMsgTimestamp));
+
+    console.log(chats);
+    res.json({ success: true, data: chats });
 });
 
 app.get('/logout', (req, res) => {
     res.cookie('token', '', { httpOnly: true, maxAge: 1 });
     res.json({ success: true });
 });
+
+const users = {};
 
 io.on("connection", (socket) => {
     if (!socket.handshake.headers.cookie) return;
@@ -117,9 +153,26 @@ io.on("connection", (socket) => {
 
     const data = jwt.verify(token, process.env.SECRET);
 
-    socket.on("send-message", async (message) => {
-        socket.broadcast.emit("chat-message", { author: data.username, message: message });
-        await chatModel.findOneAndUpdate({ id: "1234567890" }, { $push: { messages: { author: data.username, content: message } } });
+    socket.on("chat-user-connected", (chatid, username) => {
+        users[socket.id] = { username: username, chatid: chatid };
+
+        socket.join(chatid);
+    });
+
+    socket.on("send-message", async (chatid, message) => {
+        const currentDate = new Date();
+
+        socket.to(chatid).emit("chat-message", { author: data.username, message: message });
+        await chatModel.findOneAndUpdate({ id: chatid }, { $push: { messages: { author: data.username, content: message } }, lastMsgTimestamp: currentDate.getTime() });
+    });
+
+    socket.on("disconnect", async () => {
+        if (!users[socket.id]) return;
+
+        const currentDate = new Date();
+
+        await userModel.findOneAndUpdate({ username: users[socket.id].username }, { "chats.$[i].lastSeen": currentDate.getTime() }, { arrayFilters: [{ "i.id": users[socket.id].chatid }] });
+        delete users[socket.id];
     });
 });
 
