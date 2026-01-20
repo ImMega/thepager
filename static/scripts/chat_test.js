@@ -222,5 +222,5 @@ function logout() {
 }
 
 function switchChat(chatid) {
-    document.location.href = "/test/" + chatid;
+    document.location.href = "/chat/" + chatid;
 }

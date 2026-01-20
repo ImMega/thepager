@@ -16,14 +16,15 @@ const httpServer = createServer(app);
 const io = new Server(httpServer);
 
 app.use(express.json());
+app.use('/static', express.static(__dirname + '/static/'));
 
-app.get('/test', (req, res) => {
+app.get('/chat', (req, res) => {
     res.sendFile('/pages/main.html', { root: __dirname });
 });
 
-app.get('/test/:chatid', async (req, res) => {
+app.get('/chat/:chatid', async (req, res) => {
     res.sendFile('/pages/main.html', { root: __dirname });
-})
+});
 
 app.get('/', (req, res) => {
     if (!req.headers.cookie) return res.redirect("/login");
@@ -49,12 +50,11 @@ app.get('/login', (req, res) => {
     res.redirect("/chat")
 });
 
-app.get('/chat', async (req, res) => {
+app.get('/test', async (req, res) => {
     res.sendFile('/pages/chat.html', { root: __dirname });
-})
+});
 
-app.use('/static', express.static(__dirname + '/static/'));
-
+// API end-points
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
     const passHash = crypto.hash('sha256', password);
@@ -130,7 +130,16 @@ app.post('/get-rooms', async (req, res) => {
         chatData = await chatModel.find({ id: { $in: userData.chats.map(c => c.id) } });
     } catch(err) { console.log(err); return res.json({ success: false }); }
 
-    chatData.forEach(chat => chats.push({ id: chat.id, name: chat.name, lastMsgTimestamp: chat.lastMsgTimestamp, lastSeen: userData.chats.find(c => c.id == chat.id).lastSeen }));
+    chatData.forEach(chat => {
+        if (!chat.users.includes(username) && chat.id != "global-chat") return;
+
+        chats.push({
+            id: chat.id,
+            name: chat.name,
+            lastMsgTimestamp: chat.lastMsgTimestamp,
+            lastSeen: userData.chats.find(c => c.id == chat.id).lastSeen
+        });
+    });
 
     chats.sort((a, b) => new Date(b.lastMsgTimestamp) - new Date(a.lastMsgTimestamp));
 
@@ -142,7 +151,9 @@ app.get('/logout', (req, res) => {
     res.json({ success: true });
 });
 
+// socket.io implementation
 const users = {};
+const chats = {};
 
 io.on("connection", (socket) => {
     if (!socket.handshake.headers.cookie) return;
@@ -152,7 +163,14 @@ io.on("connection", (socket) => {
 
     const data = jwt.verify(token, process.env.SECRET);
 
+    socket.data.username = data.username;
+
     socket.on("chat-user-connected", (chatid, username) => {
+        socket.data.currentChat = chatid;
+
+        if (!chats[chatid]) chats[chatid] = { users: {} }
+
+        chats[chatid].users[username] = socket.id;
         users[socket.id] = { username: username, chatid: chatid };
 
         socket.join(chatid);
@@ -169,12 +187,15 @@ io.on("connection", (socket) => {
         if (!users[socket.id]) return;
 
         const currentDate = new Date();
+        const user = users[socket.id];
 
-        await userModel.findOneAndUpdate({ username: users[socket.id].username }, { "chats.$[i].lastSeen": currentDate.getTime() }, { arrayFilters: [{ "i.id": users[socket.id].chatid }] });
+        await userModel.findOneAndUpdate({ username: user.username }, { "chats.$[i].lastSeen": currentDate.getTime() }, { arrayFilters: [{ "i.id": user.chatid }] });
+        delete chats[user.chatid].users[user.username];
         delete users[socket.id];
     });
 });
 
+// Database and HTTP server initialization
 mongoose.connect(process.env.MONGO)
 .then(() => console.log("Connected to MongoDB"))
 .catch((err) => console.log(err));

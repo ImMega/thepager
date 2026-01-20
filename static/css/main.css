@@ -183,6 +183,7 @@ body {
 
 .floating-button, #send-button {
     background-color: rgb(85, 83, 255);
+    cursor: pointer;
 }
 
 .floating-button:hover, #send-button:hover {
