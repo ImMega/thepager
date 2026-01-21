@@ -1,8 +1,9 @@
 var username;
-
 const socket = io();
-
 var chatid;
+var newdmgroup = 0;
+var newchatusers = [];
+
 
 window.onload = fetch('/get-user').then((res) => {
     res.json().then(async (data) => {
@@ -14,12 +15,22 @@ window.onload = fetch('/get-user').then((res) => {
 
         chatid = document.location.pathname.split("/")[2];
 
-        const roomsRes = await fetch('/get-rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: "Yamega" }) });
+        if (chatid == "global-chat") document.getElementById("global-chat").classList.add("room-active");
+
+        const roomsRes = await fetch('/get-rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username }) });
         const roomsJson = await roomsRes.json();
         const roomsData = roomsJson.data;
         const rooms = document.createDocumentFragment();
 
-        for (var i = 0; i < roomsData.length; i++) {
+        if (!roomsData.length) {
+            const noChatsElement = document.createElement("p");
+            noChatsElement.classList.add("no-chats-text")
+            noChatsElement.innerText = "You have no chats.\n You can try creating some!";
+
+            rooms.appendChild(noChatsElement);
+        }
+
+        if (roomsData) for (var i = 0; i < roomsData.length; i++) {
             const thisRoom = roomsData[i];
             const roomElement = roomElCreate(thisRoom.id, thisRoom.name, false);
 
@@ -28,7 +39,7 @@ window.onload = fetch('/get-user').then((res) => {
 
         document.getElementById("room-list").append(rooms);
 
-        for (var i = 0; i < roomsData.length; i++) {
+        if (roomsData) for (var i = 0; i < roomsData.length; i++) {
             document.getElementById(roomsData[i].id).addEventListener("click", function () { switchChat(this.id) });
         }
 
@@ -80,7 +91,8 @@ window.onload = fetch('/get-user').then((res) => {
 });
 
 document.onkeydown = (e) => {
-    if(e.keyCode == 13 && !e.repeat) return sendMsg();
+    if (document.getElementById("new-chat-dialog").open) return;
+    if (e.keyCode == 13 && !e.repeat) return sendMsg();
 }
 
 socket.on("chat-message", msg => {
@@ -111,6 +123,8 @@ socket.on("chat-message", msg => {
 
         chatbox.scrollTop = chatbox.scrollHeight;
     }
+
+    if (chatid == "global-chat") return;
 
     const oldNode = document.getElementById(chatid);
 
@@ -176,7 +190,6 @@ function sendMsg() {
     socket.emit("send-message", chatid, msgInput.value);
 
     if (chatbox.children.length > 0) {
-        console.log("aa")
         const lastMsg = chatbox.children.item(chatbox.children.length - 1);
 
         if (lastMsg.children.item(0).innerHTML == username) {
@@ -203,6 +216,8 @@ function sendMsg() {
     }
 
     msgInput.value = '';
+
+    if (chatid == "global-chat") return;
     
     const oldNode = document.getElementById(chatid);
 
@@ -223,4 +238,85 @@ function logout() {
 
 function switchChat(chatid) {
     document.location.href = "/chat/" + chatid;
+}
+
+// Chat creation functions
+function newChatUserCreate(user) {
+    const userElement = document.createElement("button");
+    userElement.classList.add("users-box-entry");
+    userElement.innerHTML = user + "&nbsp;&nbsp;X"
+
+    userElement.addEventListener("click", function () {
+        const index = newchatusers.indexOf(user);
+        if (index > -1) newchatusers.splice(index, 1);console.log(newchatusers)
+        if (!newdmgroup) document.getElementById("add-user-button").disabled = false;
+
+        this.remove();
+    });
+
+    return userElement;
+}
+
+function openNewChatDialog() {
+    document.getElementById('new-chat-dialog').showModal();
+    newchatusers = [];
+}
+
+function newChatSwitchDm() {
+    if (!newdmgroup) return;
+    document.getElementById("dm-button").classList.add("dm-chat-button-selected");
+    document.getElementById("chat-button").classList.remove("dm-chat-button-selected");
+
+    newdmgroup = 0;
+    newchatusers = [];
+    document.getElementById("users-box").innerHTML = "";
+}
+
+function newChatSwitchChat() {
+    if (newdmgroup) return;
+    document.getElementById("dm-button").classList.remove("dm-chat-button-selected");
+    document.getElementById("chat-button").classList.add("dm-chat-button-selected");
+
+    newdmgroup = 1;
+    newchatusers = [];
+    document.getElementById("users-box").innerHTML = "";
+    document.getElementById("add-user-button").disabled = false;
+}
+
+async function newChatAddUser() {
+    const userInput = document.getElementById("user-input");
+    const userWarningText = document.getElementById("user-warning-text");
+
+    if (newchatusers.includes(userInput.value)) {
+        userInput.value = "";
+        userWarningText.innerText = "User is already added";
+        userWarningText.hidden = false;
+
+        setTimeout(() => {
+            userWarningText.hidden = true
+        }, 5000);
+        return;
+    }
+
+    const user = await fetch('/verify-user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: userInput.value }) });
+    const userJson = await user.json();
+    const userExists = userJson.exists;
+
+    if (userExists) {
+        const userElement = newChatUserCreate(userInput.value);
+
+        newchatusers.push(userInput.value);console.log(newchatusers)
+        userInput.value = "";
+
+        document.getElementById("users-box").append(userElement);
+
+        if (!newdmgroup) document.getElementById("add-user-button").disabled = true;
+    } else {userWarningText.innerText = "User does not exist"
+        userWarningText.hidden = false;
+        userInput.value = "";
+
+        setTimeout(() => {
+            userWarningText.hidden = true
+        }, 5000);
+    }
 }

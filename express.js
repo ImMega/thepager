@@ -103,6 +103,21 @@ app.get('/get-user', (req, res) => {
     res.json({ success: true, username: data.username });
 });
 
+app.post('/verify-user', async (req, res) => {
+    const { username } = req.body;
+
+    let userData;
+    try {
+        userData = await userModel.findOne({ username: username })
+    } catch(err) { console.log(err); return res.json({ success: false }); }
+
+    if (userData) {
+        res.json({ success: true, exists: true });
+    } else {
+        res.json({ success: true, exists: false });
+    }
+});
+
 app.post('/get-chat', async (req, res) => {
     const { chatId } = req.body;
 
@@ -126,20 +141,18 @@ app.post('/get-rooms', async (req, res) => {
     const chats = [];
     
     try {
-        userData = await userModel.findOne({ username: username });
-        chatData = await chatModel.find({ id: { $in: userData.chats.map(c => c.id) } });
+        userData = await userModel.findOne({ username: username }); 
+        chatData = await chatModel.find({ users: username }); 
+        let modifiedData = false;
+        for (let i = 0; i < chatData.length; i++) {
+            if (!userData.chats.find(e => e.id == chatData[i].id)) await userData.updateOne({ $push: { chats: { id: chatData[i].id, lastSeen: 0 } } });
+            if (!modifiedData) modifiedData = true;
+        }
+
+        if (modifiedData) userData = await userModel.findOne({ username: username }); 
     } catch(err) { console.log(err); return res.json({ success: false }); }
 
-    chatData.forEach(chat => {
-        if (!chat.users.includes(username) && chat.id != "global-chat") return;
-
-        chats.push({
-            id: chat.id,
-            name: chat.name,
-            lastMsgTimestamp: chat.lastMsgTimestamp,
-            lastSeen: userData.chats.find(c => c.id == chat.id).lastSeen
-        });
-    });
+    chatData.forEach(chat => { chats.push({ id: chat.id, name: chat.name, lastMsgTimestamp: chat.lastMsgTimestamp, lastSeen: userData.chats.find(c => c.id == chat.id).lastSeen }) });
 
     chats.sort((a, b) => new Date(b.lastMsgTimestamp) - new Date(a.lastMsgTimestamp));
 
@@ -147,7 +160,7 @@ app.post('/get-rooms', async (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-    res.cookie('token', '', { httpOnly: true, maxAge: 1 });
+    res.cookie('token', '', { httpOnly: true, maxAge: 0 });
     res.json({ success: true });
 });
 

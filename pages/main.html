@@ -9,17 +9,37 @@
         <script src="/static/scripts/chat_test.js"></script>
     </head>
     <body>
+        <dialog id="new-chat-dialog">
+            <h2 id="new-chat-text" class="dialog-text">Create a New Chat</h2>
+            <div id="dm-chat-button-row">
+                <div id="dm-chat-button-outskirt">
+                    <button id="dm-button" class="dm-chat-button dm-chat-button-selected" onclick="newChatSwitchDm()">Direct Message</button>
+                    <button id="chat-button" class="dm-chat-button" onclick="newChatSwitchChat()">Group Chat</button>
+                </div>
+            </div>
+            <h4 id="new-chat-users-text">Users</h4>
+            <div id="users-box"></div>
+            <span id="user-warning-text" hidden>User doesn't exist</span>
+            <div id="user-input-box">
+                <input type="text" id="user-input" placeholder="Add a user...">
+                <button id="add-user-button" onclick="newChatAddUser()">Add User</button>
+            </div>
+        </dialog>
         <div id="maincontainer">
             <div id="side-bar">
-                <img src="/static/svg/pager_logo.svg" alt="pager logo" id="logo-side">
+                <a class="img-link" href="/"><img src="/static/svg/pager_logo.svg" alt="pager logo" id="logo-side"></a>
                 <h2 id="greeting"></h2>
+                <div id="global-chat" class="room" onclick="switchChat(this.id)">
+                    <div class="room-name">Global Chat</div>
+                </div><hr>
+                <h3 id="your-chats">Your Chats</h3>
                 <div id="room-list"></div>
                 <div id="floating-button-row" >
                     <div id="floating-button-subrow">
                         <button class="floating-button floating-button-small" onclick="logout()">L</button>
                         <button class="floating-button floating-button-small">C</button>
                     </div>
-                    <button class="floating-button">+</button>
+                    <button class="floating-button" onclick="openNewChatDialog()">+</button>
                 </div>
             </div>
             <div id="chat-container">
