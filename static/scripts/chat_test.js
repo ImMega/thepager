@@ -270,6 +270,9 @@ function newChatSwitchDm() {
     newdmgroup = 0;
     newchatusers = [];
     document.getElementById("users-box").innerHTML = "";
+    document.getElementById("chat-name-input").value = "";
+    document.getElementById("chat-name-text").hidden = true;
+    document.getElementById("chat-name-input-box").classList.add("full-hidden");
 }
 
 function newChatSwitchChat() {
@@ -281,6 +284,8 @@ function newChatSwitchChat() {
     newchatusers = [];
     document.getElementById("users-box").innerHTML = "";
     document.getElementById("add-user-button").disabled = false;
+    document.getElementById("chat-name-text").hidden = false;
+    document.getElementById("chat-name-input-box").classList.remove("full-hidden");
 }
 
 async function newChatAddUser() {

@@ -205,7 +205,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     box-shadow: 0.5px 1px 3px 0px gray;
 }
 
-#chatinput:focus, #user-input:focus {
+#chatinput:focus, #user-input:focus, #chat-name-input:focus {
     outline: 1px solid gray;
 }
 
@@ -335,13 +335,14 @@ dialog::backdrop {
     padding: 5px 10px;
     box-shadow: 0.5px 0.5px 3px -0.5px gray;
     font-weight: 600;
+    cursor: pointer;
 }
 
-#new-chat-users-text {
-    margin: 5px 10px;
+#new-chat-users-text, #chat-name-text {
+    margin: 10px 10px 5px 10px;
 }
 
-#user-input-box {
+#user-input-box, #chat-name-input-box {
     height: 30px;
     border-radius: 20pt;
     display: flex;
@@ -350,11 +351,23 @@ dialog::backdrop {
     gap: 10px;
 }
 
-#user-input {
+#chat-name-input-box {
+    margin: 0;
+}
+
+.full-hidden {
+    display: none !important;
+}
+
+#user-input, #chat-name-input {
     border: none;
     border-radius: 20pt;
     box-shadow: 0.5px 1px 3px 0px gray;
     padding: 0 10px;
+}
+
+#chat-name-input {
+    width: 100%;
 }
 
 #add-user-button {

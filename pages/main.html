@@ -17,9 +17,13 @@
                     <button id="chat-button" class="dm-chat-button" onclick="newChatSwitchChat()">Group Chat</button>
                 </div>
             </div>
+            <h4 id="chat-name-text" hidden>Chat Name</h4>
+            <div id="chat-name-input-box" class="full-hidden">
+                <input type="text" id="chat-name-input" placeholder="Enter the chat name...">
+            </div>
             <h4 id="new-chat-users-text">Users</h4>
             <div id="users-box"></div>
-            <span id="user-warning-text" hidden>User doesn't exist</span>
+            <span id="user-warning-text" hidden></span>
             <div id="user-input-box">
                 <input type="text" id="user-input" placeholder="Add a user...">
                 <button id="add-user-button" onclick="newChatAddUser()">Add User</button>
