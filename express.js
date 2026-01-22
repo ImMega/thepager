@@ -119,6 +119,13 @@ app.post('/verify-user', async (req, res) => {
 });
 
 app.post('/get-chat', async (req, res) => {
+    if (!req.headers.cookie) return res.sendFile('/pages/index.html', { root: __dirname });
+
+    const cookies = req.headers.cookie.split("; ");
+    const token = cookies.find(c => c.startsWith("token=")).split("=")[1];
+
+    const data = jwt.verify(token, process.env.SECRET);
+
     const { chatId } = req.body;
 
     if (!chatId) return res.status(400).json({ success: false, message: "Must provide chat ID" });
@@ -130,7 +137,37 @@ app.post('/get-chat', async (req, res) => {
 
     if (!chatData) return res.status(404).json({ success: false, message: "Chat doesn't exist" });
 
-    return res.json({ success: true, data: chatData });
+    return res.json({ success: true, data: chatData, name: chatData.isDm ? chatData.name.replace(", ", "").replace(data.username, "") : chatData.name });
+});
+
+app.post('/create-chat', async (req, res) => {
+    if (!req.headers.cookie) return res.sendFile('/pages/index.html', { root: __dirname });
+
+    const cookies = req.headers.cookie.split("; ");
+    const token = cookies.find(c => c.startsWith("token=")).split("=")[1];
+
+    const data = jwt.verify(token, process.env.SECRET);
+
+    let { name, users, isDm } = req.body;
+    users.unshift(data.username);
+    const currentDate = new Date();
+    if (isDm) name = name.replace(", ", "").replace(data.username, "");
+
+    try {
+        let id;
+        while (!id) {
+            const generatedId = Math.random().toString(16).slice(2);
+
+            const chatCheck = await chatModel.findOne({ id: generatedId });
+
+            if (!chatCheck) id = generatedId;
+        }
+
+        const chat = await chatModel.create({ id: id, name: isDm ? data.username + ", " + users[1] : name, isDm: isDm, users: users, lastMsgTimestamp: currentDate.getTime() });
+        chat.save();
+
+        res.json({ success: true, data: { id: chat.id, name: isDm ? chat.name.replace(", ", "").replace(data.username, "") : chat.name }, message: "Chat created" });
+    } catch(err) { console.log(err); return res.json({ success: false }); }
 });
 
 app.post('/get-rooms', async (req, res) => {
@@ -149,10 +186,21 @@ app.post('/get-rooms', async (req, res) => {
             if (!modifiedData) modifiedData = true;
         }
 
-        if (modifiedData) userData = await userModel.findOne({ username: username }); 
+        if (modifiedData) userData = await userModel.findOne({ username: username });
     } catch(err) { console.log(err); return res.json({ success: false }); }
 
-    chatData.forEach(chat => { chats.push({ id: chat.id, name: chat.name, lastMsgTimestamp: chat.lastMsgTimestamp, lastSeen: userData.chats.find(c => c.id == chat.id).lastSeen }) });
+    chatData.forEach(chat => {
+        let name = chat.name;
+        if (chat.isDm) name = chat.name.replace(", ", "").replace(username, "");
+
+        chats.push({
+            id: chat.id,
+            name: name,
+            lastMsgTimestamp:
+            chat.lastMsgTimestamp,
+            lastSeen: userData.chats.find(c => c.id == chat.id).lastSeen
+        });
+    });
 
     chats.sort((a, b) => new Date(b.lastMsgTimestamp) - new Date(a.lastMsgTimestamp));
 

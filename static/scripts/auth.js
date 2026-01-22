@@ -1,5 +1,5 @@
 window.onload = fetch('/get-user').then((res) => {
-    document.getElementById("aaaa").classList.add("show");
+    document.getElementById("login-fields").classList.add("show");
     res.json().then((data) => {
         if (!data.success) return;
 
@@ -14,7 +14,7 @@ window.onload = fetch('/get-user').then((res) => {
         userInput.value = "";
         passInput.value = "";
 
-        document.getElementById("aaaa").classList.remove("show");
+        document.getElementById("login-fields").classList.remove("show");
     });
 });
 
@@ -73,7 +73,7 @@ async function login()  {
     userInput.value = "";
     passInput.value = "";
 
-    document.getElementById("aaaa").classList.remove("show");
+    document.getElementById("login-fields").classList.remove("show");
 
     document.location.href = "/chat";
 }
@@ -89,5 +89,5 @@ function logout() {
 
     fetch('/logout');
 
-    document.getElementById("aaaa").classList.add("show");
+    document.getElementById("login-fields").classList.add("show");
 }

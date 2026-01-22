@@ -134,6 +134,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     color: white;
     font-size: x-large;
     box-shadow: 0.5px 1px 3px 0.5px gray;
+    transition: background-color 0.25s, transform 0.15s;
 }
 
 .floating-button-small {
@@ -218,6 +219,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     color: white;
     font-weight: bolder;
     font-size: large;
+    transition: background-color 0.25s, transform 0.15s;
 }
 
 .floating-button, #send-button {
@@ -231,13 +233,14 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
 
 .floating-button:active, #send-button:active {
     background-color: rgb(62, 71, 204);
+    transform: scale(0.9);
 }
 
 dialog {
     border: none;
     border-radius: 25pt;
     box-shadow: 1px 5px 20px -10px black;
-    padding: 30px;
+    padding: 20px 30px;
 }
 
 dialog::backdrop {
@@ -276,6 +279,7 @@ dialog::backdrop {
     border: none;
     background-color: white;
     cursor: pointer;
+    transition: background-color 0.25s, transform 0.15s;
 }
 
 .dm-chat-button:hover {
@@ -302,11 +306,11 @@ dialog::backdrop {
     border: none;
 }
 
-.dm-chat-button-selected:hover, #add-user-button:hover {
+.dm-chat-button-selected:hover, #add-user-button:hover, .button:hover, .users-box-entry:hover {
     background-color: rgb(72, 84, 240);
 }
 
-.dm-chat-button-selected:active, #add-user-button:active {
+.dm-chat-button-selected:active, #add-user-button:active, .button:active, .users-box-entry:active {
     background-color: rgb(67, 77, 219);
 }
 
@@ -325,7 +329,9 @@ dialog::backdrop {
     align-items: center;
     padding: 5px 10px;
     box-shadow: 0.5px 1px 3px 0px gray;
+    overflow-y: hidden;
     overflow-x: scroll;
+    scrollbar-width: thin;
 }
 
 .users-box-entry {
@@ -336,6 +342,9 @@ dialog::backdrop {
     box-shadow: 0.5px 0.5px 3px -0.5px gray;
     font-weight: 600;
     cursor: pointer;
+    background-color: rgb(95, 106, 255);
+    color: white;
+    transition: background-color 0.25s, transform 0.15s;
 }
 
 #new-chat-users-text, #chat-name-text {
@@ -378,9 +387,46 @@ dialog::backdrop {
     background-color: rgb(83, 94, 255);
     color: white;
     cursor: pointer;
+    transition: background-color 0.25s, transform 0.15s;
+}
+
+#add-user-button:active, .button:active, .users-box-entry:active {
+    transform: scale(0.9);
 }
 
 #user-warning-text {
     color: red;
     align-self: center;
+}
+
+.button {
+    padding: 7px 20px;
+    border: none;
+    border-radius: 15pt;
+    background-color: rgb(83, 94, 255);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.25s, transform 0.15s;
+}
+
+.button-invert {
+    background-color: transparent;
+    color: rgb(83, 94, 255);
+    border: 2px solid rgb(83, 94, 255);
+}
+
+.button-invert:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.button-invert:active {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+#button-row {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: center;
 }

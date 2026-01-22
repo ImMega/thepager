@@ -50,6 +50,10 @@ window.onload = fetch('/get-user').then((res) => {
 
         if (chatRes.status == 404) return document.location.href = "/test";
 
+        document.title = "Pager - " + chatJson.name;
+
+        document.getElementById(chatid).scrollIntoView({ block: "center" });
+
         socket.emit("chat-user-connected", chatid, username);
 
         const chatbox = document.getElementById("chatbox");
@@ -258,8 +262,16 @@ function newChatUserCreate(user) {
 }
 
 function openNewChatDialog() {
-    document.getElementById('new-chat-dialog').showModal();
     newchatusers = [];
+    document.getElementById('new-chat-dialog').showModal();
+}
+
+function closeNewChatDialog() {
+    newchatusers = [];
+    document.getElementById("users-box").innerHTML = "";
+    document.getElementById("chat-name-input").value = "";
+    document.getElementById("add-user-button").disabled = false;
+    document.getElementById('new-chat-dialog').close();
 }
 
 function newChatSwitchDm() {
@@ -283,25 +295,28 @@ function newChatSwitchChat() {
     newdmgroup = 1;
     newchatusers = [];
     document.getElementById("users-box").innerHTML = "";
+    document.getElementById("chat-name-input").value = "";
     document.getElementById("add-user-button").disabled = false;
     document.getElementById("chat-name-text").hidden = false;
     document.getElementById("chat-name-input-box").classList.remove("full-hidden");
 }
 
+function fireUserWarningText(message) {
+    const userWarningText = document.getElementById("user-warning-text");
+    userWarningText.innerText = message;
+    userWarningText.hidden = false;
+
+    setTimeout(() => {
+        userWarningText.hidden = true
+    }, 5000);
+}
+
 async function newChatAddUser() {
     const userInput = document.getElementById("user-input");
-    const userWarningText = document.getElementById("user-warning-text");
 
-    if (newchatusers.includes(userInput.value)) {
-        userInput.value = "";
-        userWarningText.innerText = "User is already added";
-        userWarningText.hidden = false;
+    if (newchatusers.includes(userInput.value)) return fireUserWarningText("User is already added!");
 
-        setTimeout(() => {
-            userWarningText.hidden = true
-        }, 5000);
-        return;
-    }
+    if (userInput.value == username) return fireUserWarningText("You can't add yourself. You'll be added automatically!");
 
     const user = await fetch('/verify-user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: userInput.value }) });
     const userJson = await user.json();
@@ -316,12 +331,27 @@ async function newChatAddUser() {
         document.getElementById("users-box").append(userElement);
 
         if (!newdmgroup) document.getElementById("add-user-button").disabled = true;
-    } else {userWarningText.innerText = "User does not exist"
-        userWarningText.hidden = false;
-        userInput.value = "";
-
-        setTimeout(() => {
-            userWarningText.hidden = true
-        }, 5000);
+    } else {
+        fireUserWarningText("User does not exist!");
     }
+}
+
+async function createNewChat() {
+    const chatName = document.getElementById("chat-name-input").value;
+
+    if (newdmgroup && !chatName) return fireUserWarningText("Group chat needs to have a name!");
+    if (!newchatusers.length) return fireUserWarningText("Can't create a chat with no users!");
+
+    const chatCreate = await fetch('/create-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: chatName, users: newchatusers, isDm: !newdmgroup }) });
+    const chatCreateJson = await chatCreate.json();
+
+    if (chatCreateJson.success) {
+        const roomElement = roomElCreate(chatCreateJson.data.id, chatCreateJson.data.name, false);
+
+        document.getElementById("room-list").prepend(roomElement);
+
+        document.getElementById(chatCreateJson.data.id).addEventListener("click", function () { switchChat(this.id) });
+    }
+
+    closeNewChatDialog();
 }
