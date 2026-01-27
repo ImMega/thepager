@@ -32,6 +32,9 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
 
 .room-name {
     font-weight: 600;
+    display: flex;
+    width: 100%;
+    overflow: hidden;
 }
 
 #your-chats {
@@ -59,7 +62,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     position: relative;
     flex-direction: column;
     background-color: #FAFAFA;
-    min-width: 300px;
+    width: 300px;
     max-height: 100%;
     box-shadow: -1px 1px 12px 0px gray;
 }
@@ -80,7 +83,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
 
 .room {
     margin: 7px 10px;
-    padding: 12px 15px;
+    padding: 12px 15px 12px 10px;
     background-color: white;
     border-radius: 20pt;
     box-shadow: 1px 1px 7px -4px;
@@ -99,11 +102,17 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     border-right: 10px solid rgb(91, 89, 252);
 }
 
+.dm-group-icon {
+    margin-right: 7px;
+}
+
 .new-message-indicator {
     width: 10px;
     height: 10px;
+    aspect-ratio: 1/1;
     background-color: rgb(80, 61, 255);
     border-radius: 5pt;
+    margin-left: 5px;
 }
 
 #floating-button-row {
@@ -127,7 +136,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
 
 .floating-button {
     height: 80%;
-    aspect-ratio: 1;
+    aspect-ratio: 1/1;
     margin: 0 10px;
     border: none;
     border-radius: 20pt;
@@ -135,11 +144,26 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     font-size: x-large;
     box-shadow: 0.5px 1px 3px 0.5px gray;
     transition: background-color 0.25s, transform 0.15s;
+    background-size: 60%;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .floating-button-small {
     margin: 0;
     font-size: large;
+}
+
+#logout-button {
+    background-image: url(/static/svg/logout_icon.svg);
+}
+
+#dark-mode-button {
+    background-image: url(/static/svg/dark_mode_icon.svg);
+}
+
+#chat-add-button {
+    background-image: url(/static/svg/add_icon.svg);
 }
 
 #chat-container {
@@ -148,8 +172,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     max-height: 100%;
     width: 100%;
     padding: 0 15px 10px 15px;
-    opacity: 0;
-    transition: opacity 1s;
+    animation: fadeIn-flex 1s;
 }
 
 #chatbox {
@@ -212,7 +235,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
 
 #send-button {
     height: 100%;
-    aspect-ratio: 1;
+    aspect-ratio: 1/1;
     border: none;
     border-radius: 20pt;
     box-shadow: 0.5px 1px 3px 0px gray;
@@ -220,6 +243,10 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     font-weight: bolder;
     font-size: large;
     transition: background-color 0.25s, transform 0.15s;
+    background-image: url(/static/svg/send_icon.svg);
+    background-size: 70%;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .floating-button, #send-button {
@@ -239,6 +266,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
 dialog {
     border: none;
     border-radius: 25pt;
+    background-color: #FAFAFA;
     box-shadow: 1px 5px 20px -10px black;
     padding: 20px 30px;
 }
@@ -397,6 +425,7 @@ dialog::backdrop {
 #user-warning-text {
     color: red;
     align-self: center;
+    padding-left: 15px;
 }
 
 .button {
@@ -429,4 +458,21 @@ dialog::backdrop {
     gap: 15px;
     margin-top: 30px;
     justify-content: center;
+}
+
+@keyframes fadeIn-flex {
+    0% {
+        display: none;
+        opacity: 0;
+    }
+
+    1% {
+        display: flex;
+        opacity: 0;
+    }
+
+    100% {
+        display: flex;
+        opacity: 1;
+    }
 }

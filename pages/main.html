@@ -19,7 +19,7 @@
             </div>
             <h4 id="chat-name-text" hidden>Chat Name</h4>
             <div id="chat-name-input-box" class="full-hidden">
-                <input type="text" id="chat-name-input" placeholder="Enter the chat name...">
+                <input type="text" id="chat-name-input" placeholder="Enter the chat name..." maxlength="50">
             </div>
             <h4 id="new-chat-users-text">Users</h4>
             <div id="users-box"></div>
@@ -44,17 +44,17 @@
                 <div id="room-list"></div>
                 <div id="floating-button-row" >
                     <div id="floating-button-subrow">
-                        <button class="floating-button floating-button-small" onclick="logout()">L</button>
-                        <button class="floating-button floating-button-small">C</button>
+                        <button id="logout-button" class="floating-button floating-button-small" onclick="logout()"></button>
+                        <button id="dark-mode-button" class="floating-button floating-button-small"></button>
                     </div>
-                    <button class="floating-button" onclick="openNewChatDialog()">+</button>
+                    <button id="chat-add-button" class="floating-button" onclick="openNewChatDialog()"></button>
                 </div>
             </div>
-            <div id="chat-container">
+            <div id="chat-container" class="full-hidden">
                 <div id="chatbox"></div>
                 <div id="input-box">
                     <input type="text" id="chatinput" placeholder="Type a message...">
-                    <button id="send-button" onclick="sendMsg()">></button>
+                    <button id="send-button" onclick="sendMsg()"></button>
                 </div>
             </div>
         </div>

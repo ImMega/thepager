@@ -9,23 +9,15 @@ const port = 80;
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 
-const fs = require("fs");
-
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
+// express middlewares
 app.use(express.json());
 app.use('/static', express.static(__dirname + '/static/'));
 
-app.get('/chat', (req, res) => {
-    res.sendFile('/pages/main.html', { root: __dirname });
-});
-
-app.get('/chat/:chatid', async (req, res) => {
-    res.sendFile('/pages/main.html', { root: __dirname });
-});
-
+// express routes
 app.get('/', (req, res) => {
     if (!req.headers.cookie) return res.redirect("/login");
 
@@ -37,6 +29,14 @@ app.get('/', (req, res) => {
     if (!data) return res.json({ success: false, message: "Session invalid." })
     
     res.redirect("/chat");
+});
+
+app.get('/chat', (req, res) => {
+    res.sendFile('/pages/main.html', { root: __dirname });
+});
+
+app.get('/chat/:chatid', async (req, res) => {
+    res.sendFile('/pages/main.html', { root: __dirname });
 });
 
 app.get('/login', (req, res) => {
@@ -136,6 +136,7 @@ app.post('/get-chat', async (req, res) => {
     } catch(err) { console.log(err); return res.json({ success: false }); }
 
     if (!chatData) return res.status(404).json({ success: false, message: "Chat doesn't exist" });
+    if (chatId != "global-chat" && !chatData.users.includes(data.username)) return res.status(403).json({ success: false, message: "You don't have access to this chat" });
 
     return res.json({ success: true, data: chatData, name: chatData.isDm ? chatData.name.replace(", ", "").replace(data.username, "") : chatData.name });
 });
@@ -166,7 +167,9 @@ app.post('/create-chat', async (req, res) => {
         const chat = await chatModel.create({ id: id, name: isDm ? data.username + ", " + users[1] : name, isDm: isDm, users: users, lastMsgTimestamp: currentDate.getTime() });
         chat.save();
 
-        res.json({ success: true, data: { id: chat.id, name: isDm ? chat.name.replace(", ", "").replace(data.username, "") : chat.name }, message: "Chat created" });
+        await userModel.findOneAndUpdate({ username: data.username }, { $push: { chats: { id: id, lastSeen: currentDate.getTime() } } });
+
+        res.json({ success: true, data: { id: chat.id, name: isDm ? chat.name.replace(", ", "").replace(data.username, "") : chat.name, isDm: chat.isDm }, message: "Chat created" });
     } catch(err) { console.log(err); return res.json({ success: false }); }
 });
 
@@ -196,6 +199,7 @@ app.post('/get-rooms', async (req, res) => {
         chats.push({
             id: chat.id,
             name: name,
+            isDm: chat.isDm,
             lastMsgTimestamp:
             chat.lastMsgTimestamp,
             lastSeen: userData.chats.find(c => c.id == chat.id).lastSeen
@@ -212,6 +216,14 @@ app.get('/logout', (req, res) => {
     res.json({ success: true });
 });
 
+// teapot.
+app.get('/teapot', (req, res) => {
+    res.sendFile('/pages/teapot.html', { root: __dirname });
+});
+
+// 404 handling
+app.use((req, res, next) => { res.status(404).sendFile('/pages/notFound.html', { root: __dirname }) });
+
 // socket.io implementation
 const users = {};
 const chats = {};
@@ -225,6 +237,8 @@ io.on("connection", (socket) => {
     const data = jwt.verify(token, process.env.SECRET);
 
     socket.data.username = data.username;
+
+    users[socket.id] = { username: data.username, chatid: false }
 
     socket.on("chat-user-connected", (chatid, username) => {
         socket.data.currentChat = chatid;
@@ -242,17 +256,28 @@ io.on("connection", (socket) => {
 
         socket.to(chatid).emit("chat-message", { author: data.username, message: message });
         await chatModel.findOneAndUpdate({ id: chatid }, { $push: { messages: { author: data.username, content: message } }, lastMsgTimestamp: currentDate.getTime() });
+
+        const chatData = await chatModel.findOne({ id: chatid });
+
+        const usersSockets = Object.keys(users);
+        const onlineChatUsersSockets = usersSockets.filter(socketId => { return chatData.users.includes(users[socketId].username); });
+        const inactiveOnlineChatUsersSockets = onlineChatUsersSockets.filter(socketId => { return !chats[chatid].users[users[socketId].username]; });
+
+        inactiveOnlineChatUsersSockets.forEach(socketId => socket.to(socketId).emit("direct-new-room-message", chatid));
     });
 
     socket.on("disconnect", async () => {
-        if (!users[socket.id]) return;
+        if (!users[socket.id] || !Object.keys(chats).length) return;
 
         const currentDate = new Date();
         const user = users[socket.id];
 
+        if (!user.chatid) return;
+
         await userModel.findOneAndUpdate({ username: user.username }, { "chats.$[i].lastSeen": currentDate.getTime() }, { arrayFilters: [{ "i.id": user.chatid }] });
         delete chats[user.chatid].users[user.username];
         delete users[socket.id];
+        if (!Object.keys(chats[user.chatid].users).length) delete chats[user.chatid];
     });
 });
 

@@ -1,0 +1,31 @@
+body {
+    display: flex;
+    height: 100vh;
+    margin: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.head-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px;
+}
+
+.head-title {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    font-size: 25pt;
+    font-weight: 600;
+}
+
+@media (max-width: 512px) {
+    .head-title {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

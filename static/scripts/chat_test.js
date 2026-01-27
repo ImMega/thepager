@@ -32,7 +32,7 @@ window.onload = fetch('/get-user').then((res) => {
 
         if (roomsData) for (var i = 0; i < roomsData.length; i++) {
             const thisRoom = roomsData[i];
-            const roomElement = roomElCreate(thisRoom.id, thisRoom.name, false);
+            const roomElement = roomElCreate(thisRoom.id, thisRoom.name, thisRoom.isDm, (thisRoom.lastSeen < thisRoom.lastMsgTimestamp && thisRoom.id != chatid));
 
             rooms.appendChild(roomElement);
         }
@@ -48,7 +48,7 @@ window.onload = fetch('/get-user').then((res) => {
         const chatRes = await fetch('/get-chat', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: chatid }) });
         const chatJson = await chatRes.json();
 
-        if (chatRes.status == 404) return document.location.href = "/test";
+        if (chatRes.status == 404) return document.location.href = "/chat";
 
         document.title = "Pager - " + chatJson.name;
 
@@ -88,9 +88,11 @@ window.onload = fetch('/get-user').then((res) => {
 
         chatbox.append(msgs);
 
-        chatbox.scrollTop = chatbox.scrollHeight;
+        setTimeout(() => {
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }, 100);
 
-        document.getElementById("chat-container").style.opacity = 1;
+        document.getElementById("chat-container").classList.remove("full-hidden");
     });
 });
 
@@ -143,6 +145,30 @@ socket.on("chat-message", msg => {
     document.getElementById(chatid).addEventListener("click", function () { switchChat(this.id) });
 });
 
+socket.on("direct-new-room-message", (chatId) => {
+    if (document.getElementById(chatId + "newmsg")) return;
+
+    const newMsgIndicator = document.createElement("div");
+    newMsgIndicator.id = chatId + "newmsg";
+    newMsgIndicator.classList.add("new-message-indicator");
+
+    document.getElementById(chatId).append(newMsgIndicator);
+
+    if (chatId == "global-chat") return;
+    
+    const oldNode = document.getElementById(chatId);
+
+    if (oldNode.isSameNode(document.getElementById("room-list").firstChild)) return;
+
+    const newNode = oldNode.cloneNode(true);
+
+    document.getElementById("room-list").prepend(newNode);
+
+    oldNode.remove();
+
+    document.getElementById(chatId).addEventListener("click", function () { switchChat(this.id) });
+});
+
 function msgCreate(message, author, themselves) {
     const msgElement = document.createElement("div");
     const authorElement = document.createElement("div");
@@ -161,22 +187,28 @@ function msgCreate(message, author, themselves) {
     return msgElement;
 }
 
-function roomElCreate(roomid, name, newMsg) {
+function roomElCreate(roomid, name, isDm, newMsg) {
     const currentChatId = document.location.pathname.split("/")[2];
 
     const roomElement = document.createElement("div");
+    const chatIcon = document.createElement("img");
     const nameElement = document.createElement("div");
     const newMsgElement = document.createElement("div");
 
     roomElement.classList.add("room");
     nameElement.classList.add("room-name");
+    chatIcon.src = isDm ? "/static/svg/direct_message_icon.svg" : "/static/svg/group_chat_icon.svg";
+    chatIcon.alt = isDm ? "Direct Message" : "Group Chat";
+    chatIcon.height = "20";
+    chatIcon.width = "20";
+    chatIcon.classList.add("dm-group-icon");
     newMsgElement.classList.add("new-message-indicator");
     if (roomid == currentChatId) roomElement.classList.add("room-active");
 
     roomElement.id = roomid;
     nameElement.innerText = name;
 
-    roomElement.append(nameElement);
+    roomElement.append(chatIcon, nameElement);
 
     if (newMsg) roomElement.append(newMsgElement);
 
@@ -346,7 +378,7 @@ async function createNewChat() {
     const chatCreateJson = await chatCreate.json();
 
     if (chatCreateJson.success) {
-        const roomElement = roomElCreate(chatCreateJson.data.id, chatCreateJson.data.name, false);
+        const roomElement = roomElCreate(chatCreateJson.data.id, chatCreateJson.data.name, chatCreateJson.data.isDm, false);
 
         document.getElementById("room-list").prepend(roomElement);
 
