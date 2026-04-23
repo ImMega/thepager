@@ -6,5 +6,7 @@ module.exports = mongoose.model("Chats", new mongoose.Schema({
     isDm: { type: Boolean, required: true },
     users: { type: [String], required: true },
     messages: { type: [], required: true },
-    lastMsgTimestamp: { type: Number, required: true }
+    lastMsgTimestamp: { type: Number, required: true },
+    owner: { type: String, required: false },
+    admins: { type: [String], required: false }
 }));

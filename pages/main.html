@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Pager</title>
+        <link rel="shortcut icon" href="/static/svg/favicon.svg" type="image/x-icon">
         <link rel="stylesheet" href="/static/css/main.css">
         <script src="/socket.io/socket.io.js"></script>
         <script src="/static/scripts/chat.js"></script>
@@ -34,8 +35,9 @@
             </div>
         </dialog>
         <div id="maincontainer">
-            <div id="side-bar">
-                <a class="img-link" href="/"><img src="/static/svg/pager_logo.svg" alt="pager logo" id="logo-side"></a>
+            <div id="side-bar" class="show-side-bar">
+                <div id="menu-button" onclick="menuButton()"></div>
+                <img src="/static/svg/pager_logo.svg" alt="pager logo" id="logo-side" onclick="home()">
                 <h2 id="greeting"></h2>
                 <div id="global-chat" class="room" onclick="switchChat(this.id)">
                     <div class="room-name">Global Chat</div>
@@ -45,10 +47,14 @@
                 <div id="floating-button-row" >
                     <div id="floating-button-subrow">
                         <button id="logout-button" class="floating-button floating-button-small" onclick="logout()"></button>
-                        <button id="dark-mode-button" class="floating-button floating-button-small"></button>
+                        <button id="dark-mode-button" class="floating-button floating-button-small" onclick="darkModeToggle()"></button>
                     </div>
                     <button id="chat-add-button" class="floating-button" onclick="openNewChatDialog()"></button>
                 </div>
+            </div>
+            <div id="welcome">
+                <h1>Welcome to Pager</h1>
+                <p>Open or create a chat to start talking to people</p>
             </div>
             <div id="chat-container" class="full-hidden">
                 <div id="chatbox"></div>

@@ -3,11 +3,30 @@ const socket = io();
 var chatid;
 var newdmgroup = 0;
 var newchatusers = [];
+var darkMode = false;
 
 
 window.onload = fetch('/get-user').then((res) => {
     res.json().then(async (data) => {
         if (!data.success) return document.location.href = "/login";
+        
+        if (getCookieByName("darkmode") == "true") {
+            document.getElementsByTagName("body")[0].classList.add("notransition");
+            document.getElementById("side-bar").classList.add("notransition");
+            document.getElementById("global-chat").classList.add("notransition");
+            darkModeToggle();
+
+            const d = new Date();
+            d.setTime(d.getTime() + (30*24*60*60*1000));
+
+            document.cookie = "darkmode=" + darkMode + "; path=/; " + "expires=" + d.toUTCString() + ";";
+
+            setTimeout(() => {    
+                document.getElementsByTagName("body")[0].classList.remove("notransition");
+                document.getElementById("side-bar").classList.remove("notransition");
+                document.getElementById("global-chat").classList.remove("notransition");
+            }, 1000);
+        }
 
         username = data.username;
 
@@ -15,6 +34,7 @@ window.onload = fetch('/get-user').then((res) => {
 
         chatid = document.location.pathname.split("/")[2];
 
+        if (chatid) menuButton();
         if (chatid == "global-chat") document.getElementById("global-chat").classList.add("room-active");
 
         const roomsRes = await fetch('/get-rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username }) });
@@ -92,9 +112,24 @@ window.onload = fetch('/get-user').then((res) => {
             chatbox.scrollTop = chatbox.scrollHeight;
         }, 100);
 
+        document.getElementById("welcome").classList.add("full-hidden");
         document.getElementById("chat-container").classList.remove("full-hidden");
     });
 });
+
+function getCookieByName(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    if (match) {
+        return match[2];
+    }
+    return null;
+}
+
+window.onresize = () => {
+    const chatbox = document.getElementById("chatbox");
+
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
 
 document.onkeydown = (e) => {
     if (document.getElementById("new-chat-dialog").open) return;
@@ -169,6 +204,50 @@ socket.on("direct-new-room-message", (chatId) => {
     document.getElementById(chatId).addEventListener("click", function () { switchChat(this.id) });
 });
 
+function menuButton() {
+    document.getElementById("side-bar").classList.toggle("hide-side-bar");
+    document.getElementById("side-bar").classList.toggle("show-side-bar");
+}
+
+function darkModeToggle() {
+    darkMode = !darkMode;
+
+    document.getElementById("chatinput").classList.toggle("dark-bg-1");
+    document.getElementById("user-input").classList.toggle("dark-bg-1");
+    document.getElementById("chat-name-input").classList.toggle("dark-bg-1");
+    document.getElementById("dm-button").classList.toggle("dark-bg-1");
+    document.getElementById("chat-button").classList.toggle("dark-bg-1");
+    document.getElementById("users-box").classList.toggle("dark-bg-3");
+
+    const rooms = document.getElementsByClassName("room");
+    const msgs = document.getElementsByClassName("chatmsg");
+    const msgSelf = document.getElementsByClassName("msgself");
+
+    for (var i = 0; i < rooms.length; i++) {
+        var room = rooms[i];
+        room.classList.toggle("dark-bg-1");
+    }
+
+    for (var i = 0; i < msgs.length; i++) {
+        var room = msgs[i];
+        room.classList.toggle("dark-msg");
+    }
+
+    for (var i = 0; i < msgSelf.length; i++) {
+        var room = msgSelf[i];
+        room.classList.toggle("dark-msg-self");
+    }
+
+    document.getElementsByTagName("body")[0].classList.toggle("dark-bg-2");
+    document.getElementById("side-bar").classList.toggle("dark-bg-2");
+    document.getElementById("new-chat-dialog").classList.toggle("dark-bg-2")
+
+    const d = new Date();
+    d.setTime(d.getTime() + (30*24*60*60*1000));
+
+    document.cookie = "darkmode=" + darkMode + "; path=/;" + "expires=" + d.toUTCString() + "; ";
+}
+
 function msgCreate(message, author, themselves) {
     const msgElement = document.createElement("div");
     const authorElement = document.createElement("div");
@@ -178,6 +257,8 @@ function msgCreate(message, author, themselves) {
     authorElement.classList.add("msgauthor");
     contentElement.classList.add("msgcontent");
     if (themselves) msgElement.classList.add("msgself");
+    if (darkMode) msgElement.classList.add("dark-msg");
+    if (darkMode && themselves) msgElement.classList.add("dark-msg-self");
 
     authorElement.innerText = author;
     contentElement.innerText = message;
@@ -204,6 +285,7 @@ function roomElCreate(roomid, name, isDm, newMsg) {
     chatIcon.classList.add("dm-group-icon");
     newMsgElement.classList.add("new-message-indicator");
     if (roomid == currentChatId) roomElement.classList.add("room-active");
+    if (darkMode) roomElement.classList.add("dark-bg-1");
 
     roomElement.id = roomid;
     nameElement.innerText = name;
@@ -274,6 +356,10 @@ function logout() {
 
 function switchChat(chatid) {
     document.location.href = "/chat/" + chatid;
+}
+
+function home() {
+    document.location.href = "/chat"
 }
 
 // Chat creation functions

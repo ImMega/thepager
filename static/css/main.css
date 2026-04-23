@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    transition: background-color 1s, color 1s;
 }
 
 hr {
@@ -8,25 +9,27 @@ hr {
     margin: 5px auto;
 }
 
-.img-link {
+#logo-side {
     display: flex;
     justify-content: center;
     align-items: center;
     align-self: center;
-    width: 0;
-    padding: 0;
-    margin-top: 15px;
+    width: 59%;
+    padding: 5px;
+    margin-top: 20px;
+    border-radius: 25pt;
+    cursor: pointer;
 }
 
-#logo-side {
-    height: 75%;
+#greeting {
+    margin-top: 5px;
 }
 
 #greeting, #roomid {
     text-align: center;
 }
 
-h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
+h1, h2, h4, p, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -51,7 +54,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
 #maincontainer {
     display: flex;
     flex-direction: row;
-    height: 100vh;
+    height: 100dvh;
     width: 100vw;
     opacity: 1;
     transition: opacity 2s;
@@ -62,9 +65,24 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     position: relative;
     flex-direction: column;
     background-color: #FAFAFA;
-    width: 300px;
-    max-height: 100%;
-    box-shadow: -1px 1px 12px 0px gray;
+    min-width: 300px;
+    height: 100%;
+    box-shadow: -1px 1px 12px 0px rgba(0, 0, 0, 0.596);
+    transition: left 0.5s;
+    transition: background-color 1s, color 1s;
+}
+
+#menu-button {
+    display: none;
+    position: fixed;
+    top: 30px;
+    left: 10px;
+    height: 35px;
+    width: 37px;
+    background-image: url(../svg/menu_icon.svg);
+    background-size: 50px;
+    background-position: center;
+    cursor: pointer;
 }
 
 #logo-side {
@@ -86,11 +104,12 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     padding: 12px 15px 12px 10px;
     background-color: white;
     border-radius: 20pt;
-    box-shadow: 1px 1px 7px -4px;
+    box-shadow: 1px 1px 7px -4px rgba(0, 0, 0, 0.7);
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    transition: background-color 1s, color 1s;
 }
 
 .room:hover {
@@ -142,7 +161,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     border-radius: 20pt;
     color: white;
     font-size: x-large;
-    box-shadow: 0.5px 1px 3px 0.5px gray;
+    box-shadow: 0.5px 1px 3px 0.5px rgba(0, 0, 0, 0.438);
     transition: background-color 0.25s, transform 0.15s;
     background-size: 60%;
     background-repeat: no-repeat;
@@ -155,15 +174,25 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
 }
 
 #logout-button {
-    background-image: url(/static/svg/logout_icon.svg);
+    background-image: url(../svg/logout_icon.svg);
 }
 
 #dark-mode-button {
-    background-image: url(/static/svg/dark_mode_icon.svg);
+    background-image: url(../svg/dark_mode_icon.svg);
 }
 
 #chat-add-button {
-    background-image: url(/static/svg/add_icon.svg);
+    background-image: url(../svg/add_icon.svg);
+}
+
+#welcome {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    animation: 2s fadeIn-flex ease-in;
 }
 
 #chat-container {
@@ -172,7 +201,7 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     max-height: 100%;
     width: 100%;
     padding: 0 15px 10px 15px;
-    animation: fadeIn-flex 1s;
+    animation: 1s fadeIn-flex;
 }
 
 #chatbox {
@@ -191,9 +220,10 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     background-color: white;
     padding: 10px 15px;
     border-radius: 15pt;
-    box-shadow: 1px 1px 7px -5px;
+    box-shadow: 1px 1px 7px -5px rgba(0, 0, 0, 0.5);
     word-break: keep-all;
     word-wrap: break-word;
+    transition: background-color 1s, color 1s;
 }
 
 .msgauthor {
@@ -226,7 +256,8 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     height: 30px;
     border: none;
     border-radius: 20pt;
-    box-shadow: 0.5px 1px 3px 0px gray;
+    box-shadow: 0.5px 1px 3px 0px rgba(0, 0, 0, 0.445);
+    transition: background-color 1s, color 1s;
 }
 
 #chatinput:focus, #user-input:focus, #chat-name-input:focus {
@@ -238,12 +269,12 @@ h2, h4, #your-chats, #roomid, #user-warning-text, .room-name, .no-chats-text {
     aspect-ratio: 1/1;
     border: none;
     border-radius: 20pt;
-    box-shadow: 0.5px 1px 3px 0px gray;
+    box-shadow: 0.5px 1px 3px 0px rgba(0, 0, 0, 0.37);
     color: white;
     font-weight: bolder;
     font-size: large;
     transition: background-color 0.25s, transform 0.15s;
-    background-image: url(/static/svg/send_icon.svg);
+    background-image: url(../svg/send_icon.svg);
     background-size: 70%;
     background-repeat: no-repeat;
     background-position: center;
@@ -294,7 +325,7 @@ dialog::backdrop {
 }
 
 #dm-chat-button-outskirt {
-    box-shadow: 0.5px 1px 3px 0px gray;
+    box-shadow: 0.5px 1px 3px 0px rgba(0, 0, 0, 0.425);
     width: 50%;
     min-width: fit-content;
     display: flex;
@@ -329,17 +360,17 @@ dialog::backdrop {
 }
 
 .dm-chat-button-selected {
-    background-color: rgb(83, 94, 255);
+    background-color: rgb(83, 94, 255) !important;
     color: white;
     border: none;
 }
 
 .dm-chat-button-selected:hover, #add-user-button:hover, .button:hover, .users-box-entry:hover {
-    background-color: rgb(72, 84, 240);
+    background-color: rgb(72, 84, 240) !important;
 }
 
 .dm-chat-button-selected:active, #add-user-button:active, .button:active, .users-box-entry:active {
-    background-color: rgb(67, 77, 219);
+    background-color: rgb(67, 77, 219) !important;
 }
 
 #add-user-button:disabled {
@@ -356,7 +387,7 @@ dialog::backdrop {
     gap: 10px;
     align-items: center;
     padding: 5px 10px;
-    box-shadow: 0.5px 1px 3px 0px gray;
+    box-shadow: 0.5px 1px 3px 0px rgba(0, 0, 0, 0.541);
     overflow-y: hidden;
     overflow-x: scroll;
     scrollbar-width: thin;
@@ -367,7 +398,7 @@ dialog::backdrop {
     border: none;
     border-radius: 20pt;
     padding: 5px 10px;
-    box-shadow: 0.5px 0.5px 3px -0.5px gray;
+    box-shadow: 0.5px 0.5px 3px -0.5px rgba(0, 0, 0, 0.342);
     font-weight: 600;
     cursor: pointer;
     background-color: rgb(95, 106, 255);
@@ -399,7 +430,7 @@ dialog::backdrop {
 #user-input, #chat-name-input {
     border: none;
     border-radius: 20pt;
-    box-shadow: 0.5px 1px 3px 0px gray;
+    box-shadow: 0.5px 1px 3px 0px rgba(0, 0, 0, 0.404);
     padding: 0 10px;
 }
 
@@ -410,7 +441,7 @@ dialog::backdrop {
 #add-user-button {
     border: none;
     border-radius: 20pt;
-    box-shadow: 0.5px 1px 3px 0px gray;
+    box-shadow: 0.5px 1px 3px 0px rgba(0, 0, 0, 0.466);
     padding: 0 10px;
     background-color: rgb(83, 94, 255);
     color: white;
@@ -445,11 +476,11 @@ dialog::backdrop {
 }
 
 .button-invert:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 .button-invert:active {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.2) !important;
 }
 
 #button-row {
@@ -458,6 +489,29 @@ dialog::backdrop {
     gap: 15px;
     margin-top: 30px;
     justify-content: center;
+}
+
+.dark-bg-1 {
+    background-color: #272727;
+    color: white;
+}
+
+.dark-bg-2 {
+    background-color: #121212 !important;
+    color: white;
+}
+
+.dark-bg-3 {
+    background-color: #272727 !important;
+    color: white;
+}
+
+.dark-msg {
+    background-color: #292929;
+}
+
+.dark-msg-self {
+    background-color: rgb(46, 61, 158);
 }
 
 @keyframes fadeIn-flex {
@@ -475,4 +529,68 @@ dialog::backdrop {
         display: flex;
         opacity: 1;
     }
+}
+
+@keyframes sideBarHideShow {
+    0% {
+        left: 0;
+        width: 100%;
+    }
+
+    99% {
+        width: 100%;
+    }
+
+    100% {
+        left: -100vw;
+        width: 300px;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .hide-side-bar {
+        position: fixed !important;
+        left: -100vw;
+    }
+
+    .show-side-bar {
+        position: fixed !important;
+        z-index: 1;
+        left: 0;
+        width: 100vw;
+        animation: 0.5s sideBarHideShow reverse ease-in;
+    }
+
+    .show-side-bar .room {
+        margin: 7px 20px;
+    }
+    
+    .show-side-bar #logo-side {
+        width: 50%;
+    }
+
+    #chatbox {
+        padding-bottom: 60px;
+    }
+
+    #input-box {
+        height: 50px;
+        position: absolute;
+        bottom: 5px;
+        left: 10px;
+        right: 10px;
+    }
+    
+    #chatinput {
+        height: 40px;
+    }
+
+    #menu-button {
+        display: block;
+        animation: 1s fadeIn-flex;
+    }
+}
+
+.notransition {
+    transition: none !important;
 }

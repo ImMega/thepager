@@ -17,12 +17,19 @@ const io = new Server(httpServer);
 app.use(express.json());
 app.use('/static', express.static(__dirname + '/static/'));
 
+function getTokenCookie(cookie) {
+    const cookies = cookie.split("; ");
+    const tokenFind = cookies.find(c => c.startsWith("token="));
+    const token = tokenFind ? tokenFind.split("=")[1] : false;
+
+    return token;
+}
+
 // express routes
 app.get('/', (req, res) => {
-    if (!req.headers.cookie) return res.redirect("/login");
+    const token = getTokenCookie(req.headers.cookie);
 
-    const cookies = req.headers.cookie.split("; ");
-    const token = cookies.find(c => c.startsWith("token=")).split("=")[1];
+    if (!token) return res.redirect("/login");
 
     const data = jwt.verify(token, process.env.SECRET);
 
@@ -35,23 +42,18 @@ app.get('/chat', (req, res) => {
     res.sendFile('/pages/main.html', { root: __dirname });
 });
 
-app.get('/chat/:chatid', async (req, res) => {
+app.get('/chat/:chatid', (req, res) => {
     res.sendFile('/pages/main.html', { root: __dirname });
 });
 
 app.get('/login', (req, res) => {
-    if (!req.headers.cookie) return res.sendFile('/pages/index.html', { root: __dirname });
+    const token = getTokenCookie(req.headers.cookie);
 
-    const cookies = req.headers.cookie.split("; ");
-    const token = cookies.find(c => c.startsWith("token=")).split("=")[1];
+    if (!token) return res.sendFile('/pages/index.html', { root: __dirname });
 
     const data = jwt.verify(token, process.env.SECRET);
     
     res.redirect("/chat")
-});
-
-app.get('/test', async (req, res) => {
-    res.sendFile('/pages/chat.html', { root: __dirname });
 });
 
 // API end-points
@@ -93,10 +95,9 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/get-user', (req, res) => {
-    if (!req.headers.cookie) return res.json({ success: false });
+    const token = getTokenCookie(req.headers.cookie);
 
-    const cookies = req.headers.cookie.split("; ");
-    const token = cookies.find(c => c.startsWith("token=")).split("=")[1];
+    if (!token) return res.json({ success: false });
 
     const data = jwt.verify(token, process.env.SECRET);
 
@@ -119,10 +120,9 @@ app.post('/verify-user', async (req, res) => {
 });
 
 app.post('/get-chat', async (req, res) => {
-    if (!req.headers.cookie) return res.sendFile('/pages/index.html', { root: __dirname });
+    const token = getTokenCookie(req.headers.cookie);
 
-    const cookies = req.headers.cookie.split("; ");
-    const token = cookies.find(c => c.startsWith("token=")).split("=")[1];
+    if (!token) return res.sendFile('/pages/index.html', { root: __dirname });
 
     const data = jwt.verify(token, process.env.SECRET);
 
@@ -142,10 +142,9 @@ app.post('/get-chat', async (req, res) => {
 });
 
 app.post('/create-chat', async (req, res) => {
-    if (!req.headers.cookie) return res.sendFile('/pages/index.html', { root: __dirname });
+    const token = getTokenCookie(req.headers.cookie);
 
-    const cookies = req.headers.cookie.split("; ");
-    const token = cookies.find(c => c.startsWith("token=")).split("=")[1];
+    if (!token) return res.sendFile('/pages/index.html', { root: __dirname });
 
     const data = jwt.verify(token, process.env.SECRET);
 
@@ -164,7 +163,7 @@ app.post('/create-chat', async (req, res) => {
             if (!chatCheck) id = generatedId;
         }
 
-        const chat = await chatModel.create({ id: id, name: isDm ? data.username + ", " + users[1] : name, isDm: isDm, users: users, lastMsgTimestamp: currentDate.getTime() });
+        const chat = await chatModel.create({ id: id, name: isDm ? data.username + ", " + users[1] : name, isDm: isDm, users: users, lastMsgTimestamp: currentDate.getTime(), owner: isDm ? undefined : data.username, admins: isDm ? undefined : [data.username] });
         chat.save();
 
         await userModel.findOneAndUpdate({ username: data.username }, { $push: { chats: { id: id, lastSeen: currentDate.getTime() } } });
@@ -200,8 +199,7 @@ app.post('/get-rooms', async (req, res) => {
             id: chat.id,
             name: name,
             isDm: chat.isDm,
-            lastMsgTimestamp:
-            chat.lastMsgTimestamp,
+            lastMsgTimestamp: chat.lastMsgTimestamp,
             lastSeen: userData.chats.find(c => c.id == chat.id).lastSeen
         });
     });
@@ -213,11 +211,16 @@ app.post('/get-rooms', async (req, res) => {
 
 app.get('/logout', (req, res) => {
     res.cookie('token', '', { httpOnly: true, maxAge: 0 });
+    res.cookie('darkmode', '', { maxAge: 0 })
     res.json({ success: true });
 });
 
 // teapot.
 app.get('/teapot', (req, res) => {
+    res.sendFile('/pages/teapot.html', { root: __dirname });
+});
+
+app.get('/coffee', (req, res) => {
     res.sendFile('/pages/teapot.html', { root: __dirname });
 });
 
@@ -229,10 +232,9 @@ const users = {};
 const chats = {};
 
 io.on("connection", (socket) => {
-    if (!socket.handshake.headers.cookie) return;
-    
-    const cookies = socket.handshake.headers.cookie.split("; ");
-    const token = cookies.find(c => c.startsWith("token=")).split("=")[1];
+    const token = getTokenCookie(socket.handshake.headers.cookie);
+
+    if (!token) return;
 
     const data = jwt.verify(token, process.env.SECRET);
 
