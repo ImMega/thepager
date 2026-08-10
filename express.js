@@ -18,6 +18,7 @@ app.use(express.json());
 app.use('/static', express.static(__dirname + '/static/'));
 
 function getTokenCookie(cookie) {
+    if (!cookie) return;
     const cookies = cookie.split("; ");
     const tokenFind = cookies.find(c => c.startsWith("token="));
     const token = tokenFind ? tokenFind.split("=")[1] : false;
